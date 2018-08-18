@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.ssy.data.DataBlock;
 import org.ssy.data.DbConfig;
 import org.ssy.data.DbSearcher;
 import org.ssy.data.Util;
@@ -29,6 +30,9 @@ public class DnsServer {
     String host = "";
 
     byte[] defaultIp = null;
+
+    byte[] defaultIp1 = ByteBuffer.allocate(4).putInt(ipToInt("120.79.90.108")).array();
+    ;
 
     String dataPath = "";
 
@@ -101,8 +105,11 @@ public class DnsServer {
               log.warn("Error: Invalid ip address");
               continue;
             }
+            DataBlock dataBlock = searcher.btreeSearch(ip);
 
-            log.info("find ip info:" + searcher.btreeSearch(ip).toString());
+            if (dataBlock != null) {
+              log.info("find ip info:" + dataBlock.toString());
+            }
 //            if ((!name.equals(host))
 //                && (!name.endsWith("." + host))) {
 //              continue;// keep silence
@@ -130,13 +137,17 @@ public class DnsServer {
                 .putInt(name.equals(host) ? 60 : 10).array());// ttl，ttl
             if (type == 1) {
               bo.write(new byte[]{0x00, 0x04});
-              int val = bytesToInt(receivePacket.getAddress()
-                  .getAddress());
+//              int val = bytesToInt(receivePacket.getAddress()
+//                  .getAddress());
 //              bo.write((!name.equals(host))
 //                  && resolved.containsKey(val) ? resolved
 //                  .get(val) : defaultIp);
               //设置默认ip信息
-              bo.write(defaultIp);
+              if (dataBlock != null && dataBlock.getCityId() == 1132) {
+                bo.write(defaultIp1);
+              } else {
+                bo.write(defaultIp);
+              }
             } else {// for MX
               String mx = "mxdomain.qq.com";
               bo.write(ByteBuffer.allocate(2)

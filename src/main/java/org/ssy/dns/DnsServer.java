@@ -7,9 +7,11 @@ import java.net.DatagramSocket;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.ssy.data.DbConfig;
+import org.ssy.data.DbSearcher;
+import org.ssy.data.Util;
 
 public class DnsServer {
 
@@ -28,16 +30,19 @@ public class DnsServer {
 
     byte[] defaultIp = null;
 
+    String dataPath="";
+
     int dnsPort = 53;
 
+    //----------------读取基础配置文件信息----------------------------------
     try {
       Properties properties = new Properties();
-
       InputStream in = DnsServer.class.getClassLoader().getResourceAsStream("conf.properties");
       properties.load(in);
       //获取key对应的value值
       host = properties.getProperty("dnsName");
       String ip = properties.getProperty("defaultIp");
+      dataPath=properties.getProperty("dataPath");
       dnsPort = Integer.valueOf(properties.getProperty("port"));
       defaultIp = ByteBuffer.allocate(4)
           .putInt(ipToInt(ip)).array();
@@ -45,6 +50,23 @@ public class DnsServer {
       log.error("load properties error", e);
       return;
     }
+    //----------------读取基础配置文件信息----------------------------------
+
+    log.warn("read config success");
+
+    //----------------读取内存索引信息-------------------------------------==
+
+    DbSearcher searcher = null;
+    try {
+      DbConfig config = new DbConfig();
+      searcher = new DbSearcher(config, dataPath);
+//      method = searcher.getClass().getMethod("btreeSearch", String.class);
+    } catch (Exception e) {
+      log.error("DbSearcher load index error", e);
+      return;
+    }
+    //----------------读取内存索引信息-------------------------------------==
+
     try (DatagramSocket serverSocket = new DatagramSocket(dnsPort)) {
       byte[] receiveData = new byte[512];
       log.info("DNSd started at :" + dnsPort);
@@ -69,10 +91,18 @@ public class DnsServer {
             String name = qname.substring(1).toLowerCase();
             int type = receiveData[idx + 1] * 256
                 + receiveData[idx + 2];
-            log.info(receivePacket.getAddress() + ":"
+
+            String ip = receivePacket.getAddress().toString();
+            log.info(ip + ":"
                 + receivePacket.getPort() + "\t" + name + "\t"
                 + type);
 
+            if (Util.isIpAddress(ip) == false) {
+              log.warn("Error: Invalid ip address");
+              continue;
+            }
+
+            log.info("find ip info:" + searcher.btreeSearch(ip).toString());
 //            if ((!name.equals(host))
 //                && (!name.endsWith("." + host))) {
 //              continue;// keep silence

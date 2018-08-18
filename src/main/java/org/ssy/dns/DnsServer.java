@@ -92,7 +92,7 @@ public class DnsServer {
             int type = receiveData[idx + 1] * 256
                 + receiveData[idx + 2];
 
-            String ip = receivePacket.getAddress().toString();
+            String ip = receivePacket.getAddress().toString().substring(1);
             log.info(ip + ":"
                 + receivePacket.getPort() + "\t" + name + "\t"
                 + type);

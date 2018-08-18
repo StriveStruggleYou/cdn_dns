@@ -30,7 +30,7 @@ public class DnsServer {
 
     byte[] defaultIp = null;
 
-    String dataPath="";
+    String dataPath = "";
 
     int dnsPort = 53;
 
@@ -42,7 +42,7 @@ public class DnsServer {
       //获取key对应的value值
       host = properties.getProperty("dnsName");
       String ip = properties.getProperty("defaultIp");
-      dataPath=properties.getProperty("dataPath");
+      dataPath = properties.getProperty("dataPath");
       dnsPort = Integer.valueOf(properties.getProperty("port"));
       defaultIp = ByteBuffer.allocate(4)
           .putInt(ipToInt(ip)).array();
@@ -127,7 +127,7 @@ public class DnsServer {
             //write answer
             bo.write(req);
             bo.write(ByteBuffer.allocate(4)
-                .putInt(name.equals(host) ? 3600 : 10).array());// ttl，ttl
+                .putInt(name.equals(host) ? 60 : 10).array());// ttl，ttl
             if (type == 1) {
               bo.write(new byte[]{0x00, 0x04});
               int val = bytesToInt(receivePacket.getAddress()

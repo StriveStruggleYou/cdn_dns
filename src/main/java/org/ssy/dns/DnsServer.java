@@ -6,6 +6,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,11 +34,11 @@ public class DnsServer {
     byte[] defaultIp = null;
 
     byte[] defaultIp1 = ByteBuffer.allocate(4).putInt(ipToInt("120.79.90.108")).array();
-    ;
 
     String dataPath = "";
 
     int dnsPort = 53;
+    Map cityIdMap = new HashMap<>();
 
     //----------------读取基础配置文件信息----------------------------------
     try {
@@ -50,6 +52,15 @@ public class DnsServer {
       dnsPort = Integer.valueOf(properties.getProperty("port"));
       defaultIp = ByteBuffer.allocate(4)
           .putInt(ipToInt(ip)).array();
+      String cityIds = properties.getProperty("cityIds");
+
+      if (cityIds != null) {
+        String[] cityIdArray = cityIds.split(",");
+        for (String cityId : cityIdArray) {
+          cityIdMap.put(cityId, 0);
+        }
+      }
+
     } catch (Exception e) {
       log.error("load properties error", e);
       return;
@@ -143,7 +154,7 @@ public class DnsServer {
 //                  && resolved.containsKey(val) ? resolved
 //                  .get(val) : defaultIp);
               //设置默认ip信息
-              if (dataBlock != null && dataBlock.getCityId() == 1132) {
+              if (dataBlock != null && cityIdMap.get(dataBlock.getCityId()) != null) {
                 bo.write(defaultIp1);
               } else {
                 bo.write(defaultIp);

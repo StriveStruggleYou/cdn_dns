@@ -156,7 +156,7 @@ public class DnsServer {
 //                  && resolved.containsKey(val) ? resolved
 //                  .get(val) : defaultIp);
               //设置默认ip信息
-              if (dataBlock != null && cityIdMap.get(dataBlock.getCityId()) != null) {
+              if (dataBlock != null && cityIdMap.get(String.valueOf(dataBlock.getCityId())) != null) {
                 bo.write(defaultIp1);
               } else {
                 bo.write(defaultIp);

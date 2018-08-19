@@ -61,6 +61,8 @@ public class DnsServer {
         }
       }
 
+      log.warn("cityIdMap size:" + cityIdMap.size() + " value:" + cityIds);
+
     } catch (Exception e) {
       log.error("load properties error", e);
       return;

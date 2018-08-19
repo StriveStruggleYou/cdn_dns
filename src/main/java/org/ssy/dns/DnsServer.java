@@ -121,7 +121,8 @@ public class DnsServer {
             DataBlock dataBlock = searcher.btreeSearch(ip);
 
             if (dataBlock != null) {
-              log.info("find ip info:" + dataBlock.toString());
+              log.info("find ip info:" + dataBlock.toString() + " test:" + cityIdMap
+                  .get(String.valueOf(dataBlock.getCityId())));
             }
 //            if ((!name.equals(host))
 //                && (!name.endsWith("." + host))) {
@@ -156,7 +157,9 @@ public class DnsServer {
 //                  && resolved.containsKey(val) ? resolved
 //                  .get(val) : defaultIp);
               //设置默认ip信息
-              if (dataBlock != null && cityIdMap.get(String.valueOf(dataBlock.getCityId())) != null) {
+
+              if (dataBlock != null
+                  && cityIdMap.get(String.valueOf(dataBlock.getCityId())) != null) {
                 bo.write(defaultIp1);
               } else {
                 bo.write(defaultIp);
